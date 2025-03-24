@@ -11,17 +11,20 @@ import com.github.szabodzsi.kibit.payment.model.TransactionStatus;
 import com.github.szabodzsi.kibit.payment.repository.AccountRepository;
 import com.github.szabodzsi.kibit.payment.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
@@ -42,13 +45,21 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction transaction = modelMapper.map(transactionCreateDTO, Transaction.class);
         transaction.setStatus(TransactionStatus.PENDING);
+        transaction.setCreated(LocalDateTime.now());
+        transaction.setUpdated(LocalDateTime.now());
         Transaction created = transactionRepository.save(transaction);
 
         updateAccounts(senderAccount.orElseThrow(), recipientAccount.orElseThrow(), transactionCreateDTO.getAmount());
 
         transactionNotificationService.sendNotification("Transaction wih id " + created.getId() + " sent.");
 
-        return modelMapper.map(transaction, TransactionDTO.class);
+        transaction.setUpdated(LocalDateTime.now());
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transactionRepository.save(transaction);
+
+        TransactionDTO transactionDTO = modelMapper.map(transaction, TransactionDTO.class);
+        log.info("Transaction created:" + transactionDTO);
+        return transactionDTO;
     }
 
     private void validateClientTransactionId(UUID clientTransactionId) {

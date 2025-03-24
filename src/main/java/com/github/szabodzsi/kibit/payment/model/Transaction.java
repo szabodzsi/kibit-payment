@@ -10,10 +10,13 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity(name = "transaction")
@@ -40,10 +43,7 @@ public class Transaction {
     @Column(nullable = false)
     private TransactionStatus status;
 
-    @CreationTimestamp
-    @Column(nullable = false)
     private LocalDateTime created;
 
-    @UpdateTimestamp
     private LocalDateTime updated;
 }

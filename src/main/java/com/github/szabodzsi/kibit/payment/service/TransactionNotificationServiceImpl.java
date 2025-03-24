@@ -13,6 +13,6 @@ public class TransactionNotificationServiceImpl implements TransactionNotificati
 
     @Override
     public void sendNotification(String message) {
-        kafkaTemplate.send(KAFKA_TOPIC, message);
+        //kafkaTemplate.send(KAFKA_TOPIC, message);
     }
 }
